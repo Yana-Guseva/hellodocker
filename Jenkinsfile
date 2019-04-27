@@ -11,9 +11,13 @@ pipeline {
                 sh 'mvn clean install'
             }
         }
-        stage ('Docker build') {
+        stage ('Docker version') {
             steps {
                 sh 'docker --version'
+            }
+        }
+        stage ('Docker build') {
+            steps {
                 script{
                     docker.build('hellodocker')
                 }
