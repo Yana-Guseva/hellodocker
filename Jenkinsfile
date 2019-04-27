@@ -14,6 +14,7 @@ pipeline {
         stage ('Docker build') {
             steps {
                 script{
+                    sh docker --version
                     docker.build('hellodocker')
                 }
             }
