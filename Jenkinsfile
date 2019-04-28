@@ -5,7 +5,7 @@ pipeline {
             DOCKER_HOST="tcp://192.168.99.100:2376"
             DOCKER_MACHINE_NAME="default"
             DOCKER_TLS_VERIFY="1"
-            ECR_URL = "625035742010.dkr.ecr.eu-central-1.amazonaws.com"
+            ECR_URL = "https://625035742010.dkr.ecr.eu-central-1.amazonaws.com"
             ECR_CREDENTIALS = "ecr:eu-central-1:aws_ecr_credentials"
             VERSION = "latest"
             PROJECT = "hellodocker"
@@ -39,9 +39,9 @@ pipeline {
             steps {
                 script {
                     // sh("eval \$(aws ecr get-login --no-include-email --region eu-central-1)")
-                    docker.withRegistry("https://625035742010.dkr.ecr.eu-central-1.amazonaws.com", "ecr:eu-central-1:aws_ecr_credentials")
+                    docker.withRegistry(ECR_URL, ECR_CREDENTIALS)
                     {
-                        docker.image(IMAGE).push(VERSION)
+                        docker.image("$IMAGE:${env.BUILD_NUMBER}").push()
                     }
                 }
             }
