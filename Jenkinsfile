@@ -1,10 +1,21 @@
 pipeline {
-    agent {
-        dockerfile true
+    agent any
+     environment {
+            DOCKER_CERT_PATH="C:\\Users\\Yana\\.docker\\machine\\machines\\default"
+            DOCKER_HOST="tcp://192.168.99.100:2376"
+            DOCKER_MACHINE_NAME="default"
+            DOCKER_TLS_VERIFY="1"
+            ECR_URL = "625035742010.dkr.ecr.eu-central-1.amazonaws.com"
+            ECR_CREDENTIALS = "ecr:eu-central-1:aws_ecr_credentials"
+            VERSION = "latest"
+            PROJECT = "hellodocker"
+            IMAGE = "hellodocker"
+            // AWS_ACCESS_KEY_ID=""
+            // AWS_SECRET_ACCESS_KEY=""
+            // AWS_DEFAULT_REGION=""
     }
     tools {
         maven 'Maven 3.5.4'
-        docker 'Docker'
     }
     stages {
         stage ('Build') {
@@ -14,15 +25,31 @@ pipeline {
         }
         stage ('Docker version') {
             steps {
-                sh 'echo "docker --version"'
+                sh 'docker --version'
             }
         }
         stage ('Docker build') {
             steps {
-                script{
-                    docker.build('hellodocker')
+                script {
+                    docker.build("$IMAGE:${env.BUILD_NUMBER}")
                 }
             }
+        }
+        stage ('Docker push') {
+            steps {
+                script {
+                    // sh("eval \$(aws ecr get-login --no-include-email --region eu-central-1)")
+                    docker.withRegistry("https://625035742010.dkr.ecr.eu-central-1.amazonaws.com", "ecr:eu-central-1:aws_ecr_credentials")
+                    {
+                        docker.image(IMAGE).push(VERSION)
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh "docker rmi $IMAGE:${env.BUILD_NUMBER}"
         }
     }
 }
